@@ -8,7 +8,7 @@ A production-ready AI workspace for enterprise knowledge management, agentic wor
 
 - [x] FastAPI setup
 - [x] Database
-- [ ] Authentication
+- [x] Authentication
 - [ ] File Upload
 - [ ] RAG
 - [ ] Agents
