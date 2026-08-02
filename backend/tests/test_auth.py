@@ -1,50 +1,59 @@
-def register_user(client):
-    return client.post(
-        "/api/v1/auth/register",
-        json={
-            "username": "batul",
-            "email": "batul@test.com",
-            "password": "Password123"
-        },
-    )
+from tests.conftest import register_user, login_user
+
+# def register_user(client):
+#     return client.post(
+#         "/api/v1/auth/register",
+#         json={
+#             "username": "batul",
+#             "email": "batul@test.com",
+#             "password": "Password123"
+#         },
+#     )
 
 
-def login_user(client, password="Password123"):
-    return client.post(
-        "/api/v1/auth/login",
-        json={
-            "email": "batul@test.com",
-            "password": password,
-        },
-    )
+# def login_user(client, password="Password123"):
+#     return client.post(
+#         "/api/v1/auth/login",
+#         json={
+#             "email": "batul@test.com",
+#             "password": password,
+#         },
+#     )
 
 
 def test_register_valid_user(client):
-    response = register_user(client)
+    response, username, email = register_user(client)
 
     assert response.status_code == 201
 
     data = response.json()
 
-    assert data["username"] == "batul"
-    assert data["email"] == "batul@test.com"
+    assert data["username"] == username
+    assert data["email"] == email
 
     assert "password" not in data
     assert "hashed_password" not in data
 
 
 def test_duplicate_email(client):
-    register_user(client)
+    _, _, email = register_user(client)
 
-    response = register_user(client)
+    response = client.post(
+        "/api/v1/auth/register",
+        json={
+            "username": "another_user",
+            "email": email,
+            "password": "Password123",
+        },
+    )
 
     assert response.status_code == 409
 
 
 def test_login_valid_credentials(client):
-    register_user(client)
+    _, _, email = register_user(client)
 
-    response = login_user(client)
+    response = login_user(client, email)
 
     assert response.status_code == 200
 
@@ -55,9 +64,13 @@ def test_login_valid_credentials(client):
 
 
 def test_login_wrong_password(client):
-    register_user(client)
+    _, _, email = register_user(client)
 
-    response = login_user(client, "WrongPassword")
+    response = login_user(
+        client,
+        email,
+        "WrongPassword",
+    )
 
     assert response.status_code == 401
 
@@ -80,9 +93,9 @@ def test_me_invalid_token(client):
 
 
 def test_me_valid_token(client):
-    register_user(client)
+    _, username, email = register_user(client)
 
-    login_response = login_user(client)
+    login_response = login_user(client, email)
 
     token = login_response.json()["access_token"]
 
@@ -97,7 +110,7 @@ def test_me_valid_token(client):
 
     data = response.json()
 
-    assert data["username"] == "batul"
-    assert data["email"] == "batul@test.com"
+    assert data["username"] == username
+    assert data["email"] == email
 
     assert "hashed_password" not in data
