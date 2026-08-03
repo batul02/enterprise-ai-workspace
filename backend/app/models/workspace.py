@@ -47,3 +47,9 @@ class Workspace(Base):
         "User",
         back_populates="workspaces",
     )
+
+    documents = relationship(
+        "Document",
+        back_populates="workspace",
+        cascade="all, delete-orphan",
+    )
