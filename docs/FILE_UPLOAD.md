@@ -455,3 +455,13 @@ app/
 │
 └── utils/
     └── validators.py                ← NEW
+
+
+Day 6 Roadmap
+Step 1  Document Model
+Step 2  Alembic Migration
+Step 3  Document Schemas
+Step 4  Local Storage Service
+Step 5  Document Service
+Step 6  Document Endpoints
+Step 7  Tests
