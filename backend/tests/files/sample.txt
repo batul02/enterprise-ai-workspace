@@ -1,0 +1,740 @@
+Absolutely. Below is a README-style note you can keep in your repository as a reference for everything we've done so far.
+
+# Enterprise AI Workspace — Backend Setup Notes
+
+This document records the backend setup completed so far, including FastAPI, PostgreSQL, SQLAlchemy, the User model, Pydantic schemas, and Alembic migrations.
+
+---
+
+## 1. Current Project Structure
+
+```text
+app/
+├── api/
+│   └── v1/
+│       ├── router.py
+│       └── endpoints/
+│           └── auth.py
+│
+├── core/
+│   ├── config.py
+│   └── security.py
+│
+├── db/
+│   └── database.py
+│
+├── models/
+│   └── user.py
+│
+├── schemas/
+│   ├── user.py
+│   └── auth.py
+│
+├── services/
+│   └── auth_service.py
+│
+└── main.py
+
+alembic/
+├── versions/
+└── env.py
+
+.env
+.gitignore
+alembic.ini
+requirements.txt
+```
+
+---
+
+# 2. PostgreSQL Setup
+
+PostgreSQL is our relational database.
+
+The application will communicate with PostgreSQL through:
+
+```text
+FastAPI
+   ↓
+SQLAlchemy
+   ↓
+psycopg
+   ↓
+PostgreSQL
+```
+
+Check whether PostgreSQL CLI is available:
+
+```bash
+psql --version
+```
+
+Connect to PostgreSQL:
+
+```bash
+psql -U postgres
+```
+
+List databases:
+
+```sql
+\l
+```
+
+Create our application database:
+
+```sql
+CREATE DATABASE enterprise_ai;
+```
+
+Connect directly to it:
+
+```bash
+psql -U postgres -d enterprise_ai
+```
+
+---
+
+# 3. Environment Variables
+
+Sensitive configuration should not be hard-coded in Python.
+
+`.env`:
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=enterprise_ai
+DB_USER=postgres
+DB_PASSWORD=your_postgres_password
+
+JWT_SECRET_KEY=your_generated_secret
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+Generate a secure JWT secret using:
+
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Important:
+
+```text
+.env
+```
+
+must be inside `.gitignore`.
+
+Never commit database passwords or JWT secrets to GitHub.
+
+---
+
+# 4. Application Configuration
+
+File:
+
+```text
+app/core/config.py
+```
+
+Purpose:
+
+> Load configuration/environment variables for the application.
+
+Example:
+
+```python
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+class Settings:
+    DB_HOST = os.getenv("DB_HOST", "localhost")
+    DB_PORT = os.getenv("DB_PORT", "5432")
+    DB_NAME = os.getenv("DB_NAME", "enterprise_ai")
+    DB_USER = os.getenv("DB_USER", "postgres")
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+    DATABASE_URL = (
+        f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}"
+        f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
+
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+    JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+    ACCESS_TOKEN_EXPIRE_MINUTES = int(
+        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
+    )
+
+
+settings = Settings()
+```
+
+The resulting database URL looks like:
+
+```text
+postgresql+psycopg://postgres:PASSWORD@localhost:5432/enterprise_ai
+```
+
+---
+
+# 5. SQLAlchemy Database Configuration
+
+File:
+
+```text
+app/db/database.py
+```
+
+Purpose:
+
+> Establish the connection between Python/SQLAlchemy and PostgreSQL.
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+from app.core.config import settings
+
+
+engine = create_engine(settings.DATABASE_URL)
+
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+)
+
+Base = declarative_base()
+
+
+def get_db():
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()
+```
+
+### Important concepts
+
+**Engine**
+
+```python
+engine = create_engine(...)
+```
+
+Represents SQLAlchemy's interface to the database.
+
+**SessionLocal**
+
+Creates database sessions used to execute queries and transactions.
+
+**Base**
+
+```python
+Base = declarative_base()
+```
+
+All SQLAlchemy ORM models inherit from this.
+
+**get_db()**
+
+FastAPI dependency that gives an endpoint a database session and closes it afterward.
+
+---
+
+# 6. First SQLAlchemy Model — User
+
+File:
+
+```text
+app/models/user.py
+```
+
+```python
+from datetime import datetime
+
+from sqlalchemy import DateTime, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.db.database import Base
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
+
+    username: Mapped[str] = mapped_column(
+        String(50),
+        unique=True,
+        nullable=False,
+    )
+
+    email: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=False,
+    )
+
+    hashed_password: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+    )
+```
+
+This represents the future PostgreSQL table:
+
+```text
+users
+─────────────────────────────────
+id                 INTEGER
+username           VARCHAR(50)
+email              VARCHAR(255)
+hashed_password    VARCHAR(255)
+created_at         TIMESTAMP
+```
+
+Important distinction:
+
+```text
+SQLAlchemy User model
+        ↓
+describes what the table should look like
+
+Alembic migration
+        ↓
+actually creates/changes the table in PostgreSQL
+```
+
+---
+
+# 7. Pydantic Schemas
+
+Models and schemas have different responsibilities.
+
+```text
+SQLAlchemy Models
+       ↓
+Database representation
+
+Pydantic Schemas
+       ↓
+API request/response representation
+```
+
+## `schemas/user.py`
+
+```python
+from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, EmailStr
+
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+```
+
+Registration accepts:
+
+```json
+{
+  "username": "batul",
+  "email": "batul@example.com",
+  "password": "password"
+}
+```
+
+But `UserResponse` deliberately does **not** return the password or password hash.
+
+---
+
+## `schemas/auth.py`
+
+```python
+from pydantic import BaseModel, EmailStr
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+```
+
+This will eventually support:
+
+```text
+LoginRequest
+     ↓
+authenticate user
+     ↓
+TokenResponse
+```
+
+---
+
+# 8. Authentication Dependencies
+
+Packages required:
+
+```bash
+pip install "pwdlib[argon2]" PyJWT email-validator
+```
+
+Their responsibilities:
+
+```text
+pwdlib + Argon2
+    ↓
+Password hashing
+
+PyJWT
+    ↓
+JWT creation/verification
+
+email-validator
+    ↓
+Pydantic EmailStr validation
+```
+
+Passwords must **never** be stored directly.
+
+Future flow:
+
+```text
+User password
+     ↓
+Argon2 hashing
+     ↓
+hashed_password
+     ↓
+PostgreSQL
+```
+
+---
+
+# 9. Alembic
+
+Alembic manages database schema migrations.
+
+Install:
+
+```bash
+pip install alembic
+```
+
+Initialize:
+
+```bash
+alembic init alembic
+```
+
+This creates:
+
+```text
+alembic/
+├── versions/
+├── env.py
+└── script.py.mako
+
+alembic.ini
+```
+
+---
+
+# 10. Configure Alembic
+
+Inside:
+
+```text
+alembic/env.py
+```
+
+connect Alembic to our SQLAlchemy metadata.
+
+```python
+from app.core.config import settings
+from app.db.database import Base
+from app.models.user import User
+```
+
+Then:
+
+```python
+config.set_main_option(
+    "sqlalchemy.url",
+    settings.DATABASE_URL,
+)
+
+target_metadata = Base.metadata
+```
+
+Why import `User`?
+
+Because:
+
+```text
+Import User
+    ↓
+User registers with Base.metadata
+    ↓
+Alembic reads Base.metadata
+    ↓
+Alembic discovers "users"
+```
+
+---
+
+# 11. Generate the First Migration
+
+Once the User model and Alembic configuration are ready:
+
+```bash
+alembic revision --autogenerate -m "create users table"
+```
+
+Look for:
+
+```text
+Detected added table 'users'
+```
+
+Alembic will generate something like:
+
+```text
+alembic/
+└── versions/
+    └── xxxxx_create_users_table.py
+```
+
+Important:
+
+> Generating a migration does **not** modify PostgreSQL yet.
+
+---
+
+# 12. Apply the Migration
+
+Run:
+
+```bash
+alembic upgrade head
+```
+
+Now:
+
+```text
+User model
+    ↓
+Alembic migration
+    ↓
+alembic upgrade head
+    ↓
+PostgreSQL
+    ↓
+users table
+```
+
+Verify:
+
+```bash
+psql -U postgres -d enterprise_ai
+```
+
+Then:
+
+```sql
+\dt
+```
+
+You should eventually see:
+
+```text
+users
+alembic_version
+```
+
+Inspect the users table:
+
+```sql
+\d users
+```
+
+`alembic_version` is maintained automatically by Alembic to track which migrations have been applied.
+
+---
+
+# 13. Authentication Goal
+
+The feature we're building next is:
+
+```text
+REGISTER
+────────
+
+POST /api/v1/auth/register
+        ↓
+Validate UserCreate
+        ↓
+Check email uniqueness
+        ↓
+Hash password
+        ↓
+Create User
+        ↓
+PostgreSQL
+        ↓
+UserResponse
+```
+
+Then:
+
+```text
+LOGIN
+─────
+
+POST /api/v1/auth/login
+        ↓
+Find user by email
+        ↓
+Verify password
+        ↓
+Generate JWT
+        ↓
+access_token
+```
+
+And finally:
+
+```text
+PROTECTED ENDPOINT
+──────────────────
+
+GET /api/v1/auth/me
+
+Authorization:
+Bearer <JWT>
+        ↓
+Validate JWT
+        ↓
+Extract user ID
+        ↓
+Find user
+        ↓
+UserResponse
+```
+
+---
+
+# 14. Responsibilities of Each File
+
+This is probably the most important part to remember:
+
+```text
+core/config.py
+    → configuration/environment variables
+
+core/security.py
+    → password hashing
+    → password verification
+    → JWT creation
+    → JWT verification
+
+db/database.py
+    → PostgreSQL/SQLAlchemy connection
+    → sessions
+    → Base
+
+models/user.py
+    → database User representation
+
+schemas/user.py
+    → user API request/response validation
+
+schemas/auth.py
+    → login/token API schemas
+
+services/auth_service.py
+    → registration/login business logic
+
+api/v1/endpoints/auth.py
+    → HTTP endpoints
+
+api/v1/router.py
+    → combines v1 routes
+
+main.py
+    → creates FastAPI application
+
+alembic/
+    → database schema migration history
+```
+
+The overall architecture is:
+
+```text
+Client
+  ↓
+FastAPI endpoint
+  ↓
+Pydantic schema
+  ↓
+Service
+  ├────────→ Security
+  │          hashing/JWT
+  ↓
+SQLAlchemy
+  ↓
+PostgreSQL
+```
+
+### Where we are right now
+
+You've completed the foundation:
+
+```text
+✓ FastAPI project structure
+✓ Environment configuration
+✓ PostgreSQL setup
+✓ SQLAlchemy connection
+✓ User ORM model
+✓ UserCreate schema
+✓ UserResponse schema
+✓ LoginRequest schema
+✓ TokenResponse schema
+✓ Alembic setup/configuration
+```
+
+The next immediate step is to **generate and apply the `users` migration**. After confirming the table exists in PostgreSQL, move on to `core/security.py` for password hashing and JWTs.
