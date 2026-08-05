@@ -25,6 +25,8 @@ from app.services.workspace_service import (
     get_workspace_by_id,
 )
 
+from app.utils.validators import validate_pdf
+
 router = APIRouter()
 
 def verify_workspace_access(
@@ -59,16 +61,12 @@ def upload_document(
             detail="Workspace not found.",
         )
 
-    if file.content_type != "application/pdf":
-        raise HTTPException(
-            status_code=415,
-            detail="Only PDF files are allowed.",
-        )
-
     verify_workspace_access(
         workspace,
         current_user,
     )
+
+    validate_pdf(file)
 
     return create_document(
         db=db,

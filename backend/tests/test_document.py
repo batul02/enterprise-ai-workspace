@@ -21,11 +21,13 @@ def upload_document(
     client,
     workspace_id,
     headers,
+    filename="sample.pdf",
+    content_type="application/pdf",
 ):
     pdf_path = (
         Path(__file__).parent
         / "files"
-        / "sample.pdf"
+        / filename
     )
 
     with open(pdf_path, "rb") as pdf:
@@ -34,9 +36,9 @@ def upload_document(
             headers=headers,
             files={
                 "file": (
-                    "sample.pdf",
+                    filename,
                     pdf,
-                    "application/pdf",
+                    content_type,
                 )
             },
         )
@@ -68,6 +70,8 @@ def test_upload_document(client):
 
     assert body["workspace_id"] == workspace["id"]
     assert body["original_filename"] == "sample.pdf"
+    assert body["extraction_status"] == "COMPLETED"
+    assert body["page_count"] > 0
 
 def test_upload_without_auth(client):
     response = client.post(
@@ -177,36 +181,76 @@ def test_delete_nonexistent_document(client):
 
     assert response.status_code == 404
 
-def test_upload_non_pdf(client):
+def test_upload_wrong_mime_type(client):
     _, _, email = register_user(client)
 
-    headers = get_auth_headers(
-        client,
-        email,
-    )
+    headers = get_auth_headers(client, email)
 
-    workspace = create_workspace(
+    workspace = create_workspace(client, headers)
+
+    response = upload_document(
         client,
+        workspace["id"],
         headers,
+        filename="sample.txt",
+        content_type="text/plain",
     )
-
-    txt_path = (
-        Path(__file__).parent
-        / "files"
-        / "sample.txt"
-    )
-
-    with open(txt_path, "rb") as txt:
-        response = client.post(
-            f"/api/v1/workspaces/{workspace['id']}/documents",
-            headers=headers,
-            files={
-                "file": (
-                    "sample.txt",
-                    txt,
-                    "text/plain",
-                )
-            },
-        )
 
     assert response.status_code == 415
+
+def test_upload_corrupted_pdf(client):
+    _, _, email = register_user(client)
+
+    headers = get_auth_headers(client, email)
+
+    workspace = create_workspace(client, headers)
+
+    response = upload_document(
+        client,
+        workspace["id"],
+        headers,
+        filename="corrupted.pdf",
+    )
+
+    assert response.status_code == 201
+
+    body = response.json()
+
+    assert body["extraction_status"] == "FAILED"
+
+def test_upload_empty_pdf(client):
+    _, _, email = register_user(client)
+
+    headers = get_auth_headers(client, email)
+
+    workspace = create_workspace(client, headers)
+
+    response = upload_document(
+        client,
+        workspace["id"],
+        headers,
+        filename="empty_01.pdf",
+    )
+
+    assert response.status_code == 201
+
+    body = response.json()
+
+    assert body["extraction_status"] == "FAILED"
+    assert body["page_count"] == 0
+
+def test_upload_zero_byte_pdf(client):
+    _, _, email = register_user(client)
+
+    headers = get_auth_headers(client, email)
+
+    workspace = create_workspace(client, headers)
+
+    response = upload_document(
+        client,
+        workspace["id"],
+        headers,
+        filename="empty.pdf",
+    )
+
+    assert response.status_code == 400
