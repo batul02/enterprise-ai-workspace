@@ -10,6 +10,10 @@ class DocumentResponse(BaseModel):
     content_type: str
     file_size: int
     uploaded_by: int
+
+    extraction_status: str
+    page_count: int | None
+
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
