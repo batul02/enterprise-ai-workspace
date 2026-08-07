@@ -1,10 +1,12 @@
 from fastapi import HTTPException, UploadFile, status
-
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+from app.core.constants import (
+    MAX_FILE_SIZE,
+    SUPPORTED_CONTENT_TYPES,
+)
 
 
 def validate_pdf(file: UploadFile):
-    if file.content_type != "application/pdf":
+    if file.content_type not in SUPPORTED_CONTENT_TYPES:
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail="Only PDF files are allowed.",
