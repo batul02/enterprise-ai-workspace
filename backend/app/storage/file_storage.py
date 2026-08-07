@@ -3,8 +3,9 @@ from uuid import uuid4
 
 from fastapi import UploadFile
 import shutil
+from app.core.constants import STORAGE_DIRECTORY
 
-BASE_STORAGE_PATH = Path("storage")
+BASE_STORAGE_PATH = Path(STORAGE_DIRECTORY)
 
 def get_workspace_directory(
     workspace_id: int,

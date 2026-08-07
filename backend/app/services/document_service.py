@@ -9,6 +9,7 @@ from app.storage.file_storage import (
     delete_file,
     save_file,
 )
+from app.core.constants import ExtractionStatus
 
 def create_document(
     db: Session,
@@ -36,13 +37,13 @@ def create_document(
 
     # Save parser results
     if parse_result.success:
-        document.extraction_status = "COMPLETED"
+        document.extraction_status = ExtractionStatus.COMPLETED.value
         document.page_count = parse_result.page_count
         document.extracted_text = parse_result.extracted_text
         document.processing_error = None
 
     else:
-        document.extraction_status = "FAILED"
+        document.extraction_status = ExtractionStatus.FAILED.value
         document.page_count = 0
         document.extracted_text = None
         document.processing_error = parse_result.error
