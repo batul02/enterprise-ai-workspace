@@ -4,6 +4,8 @@ from fastapi.testclient import TestClient
 from app.main import app
 import uuid
 
+from app.db.database import SessionLocal
+
 
 @pytest.fixture
 def client():
@@ -12,6 +14,18 @@ def client():
     """
     with TestClient(app) as test_client:
         yield test_client
+        
+@pytest.fixture
+def db():
+    """
+    Returns a database session for tests.
+    """
+    session = SessionLocal()
+
+    try:
+        yield session
+    finally:
+        session.close()
 
 def register_user(client):
     unique = uuid.uuid4().hex[:8]

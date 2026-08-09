@@ -10,6 +10,14 @@ class Settings:
     DB_NAME = os.getenv("POSTGRES_DB")
     DB_USER = os.getenv("POSTGRES_USER")
     DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+    
+    QDRANT_HOST: str = "localhost"
+
+    QDRANT_PORT: int = 6333
+
+    QDRANT_COLLECTION: str = "enterprise_documents"
+
+    EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"
 
     DATABASE_URL = (
         f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}"

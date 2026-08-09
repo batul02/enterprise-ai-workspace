@@ -20,6 +20,7 @@ def find_split_position(
     max_end: int,
 ) -> int:
 
+    # 1. Prefer paragraph/newline boundaries
     newline = text.rfind(
         "\n",
         start,
@@ -29,16 +30,25 @@ def find_split_position(
     if newline != -1:
         return newline + 1
 
-    for delimiter in [". ", "! ", "? "]:
+    # 2. Prefer sentence boundaries
+    sentence_endings = [".", "!", "?"]
+
+    best_position = -1
+
+    for ending in sentence_endings:
         position = text.rfind(
-            delimiter,
+            ending,
             start,
             max_end,
         )
 
-        if position != -1:
-            return position + len(delimiter)
+        if position > best_position:
+            best_position = position
 
+    if best_position != -1:
+        return best_position + 1
+
+    # 3. Prefer a word boundary
     space = text.rfind(
         " ",
         start,
@@ -48,6 +58,7 @@ def find_split_position(
     if space != -1:
         return space
 
+    # 4. Hard split if no natural boundary exists
     return max_end
 
 def chunk_text(
