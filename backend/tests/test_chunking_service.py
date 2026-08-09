@@ -82,8 +82,8 @@ def test_chunk_size_limit():
 
 def test_chunk_splits_on_sentence_boundary():
     text = (
-        "This is sentence one."
-        "This is sentence two."
+        "This is sentence one. "
+        "This is sentence two. "
         "This is sentence three."
     )
 

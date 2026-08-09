@@ -10,8 +10,8 @@ from app.storage.file_storage import (
     save_file,
 )
 from app.core.constants import ExtractionStatus
-from app.models.document_chunk import DocumentChunk
 from app.services.chunking_service import chunk_text
+from app.processors import document_processor
 
 def create_document(
     db: Session,
@@ -50,33 +50,22 @@ def create_document(
         document.extracted_text = None
         document.processing_error = parse_result.error
 
+    # Save document and generate document.id
     db.add(document)
-    # db.commit()
-    # db.refresh(document)
     db.flush()
 
+    # Process extracted text
     if parse_result.success:
-
-        chunks = chunk_text(
-            parse_result.extracted_text
+        document_processor.process(
+            db=db,
+            document=document,
+            extracted_text=parse_result.extracted_text,
         )
 
-        for chunk in chunks:
-
-            document_chunk = DocumentChunk(
-                document_id=document.id,
-                chunk_index=chunk.chunk_index,
-                content=chunk.content,
-                start_char=chunk.start_char,
-                end_char=chunk.end_char,
-                character_count=chunk.character_count,
-                embedding_status="PENDING",
-            )
-
-            db.add(document_chunk)
-
+    # Commit everything
     db.commit()
     db.refresh(document)
+
     return document
 
 def list_documents(
