@@ -29,7 +29,7 @@ def find_split_position(
     if newline != -1:
         return newline + 1
 
-    for delimiter in [". ", "! ", "? "]:
+    for delimiter in [".", "!", "?", ". ", "! ", "? "]:
         position = text.rfind(
             delimiter,
             start,

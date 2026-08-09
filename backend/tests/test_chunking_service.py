@@ -9,18 +9,18 @@ def test_chunk_empty_text():
 
     assert chunks == []
 
-# def test_chunk_small_text():
-#     text = "Hello World!"
+def test_chunk_small_text():
+    text = "Hello World!"
 
-#     chunks = chunk_text(text)
+    chunks = chunk_text(text)
 
-#     assert len(chunks) == 1
+    assert len(chunks) == 1
 
-    # assert chunks[0].content == text
+    assert chunks[0].content == text
 
-    # assert chunks[0].chunk_index == 0
+    assert chunks[0].chunk_index == 0
 
-    # assert chunks[0].character_count == len(text)
+    assert chunks[0].character_count == len(text)
 
 def test_chunk_large_text():
     text = "A" * (CHUNK_SIZE * 3)
@@ -80,15 +80,15 @@ def test_chunk_size_limit():
     for chunk in chunks:
         assert chunk.character_count <= CHUNK_SIZE
 
-# def test_chunk_splits_on_sentence_boundary():
-#     text = (
-#         "This is sentence one. "
-#         "This is sentence two. "
-#         "This is sentence three."
-#     )
+def test_chunk_splits_on_sentence_boundary():
+    text = (
+        "This is sentence one."
+        "This is sentence two."
+        "This is sentence three."
+    )
 
-#     chunks = chunk_text(text)
+    chunks = chunk_text(text)
 
-#     # Ensure we don't split in the middle of a word
-#     for chunk in chunks[:-1]:
-#         assert not chunk.content.endswith(" ")
+    # Ensure we don't split in the middle of a word
+    for chunk in chunks[:-1]:
+        assert not chunk.content.endswith(" ")
