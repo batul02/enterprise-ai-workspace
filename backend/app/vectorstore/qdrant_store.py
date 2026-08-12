@@ -114,3 +114,36 @@ class QdrantStore:
             ),
             wait=True,
         )
+        
+    def search(
+        self,
+        vector: list[float],
+        top_k: int,
+        workspace_id: int,
+        score_threshold: float | None = None,
+    ):
+        """
+        Search for semantically similar vectors within a workspace.
+        """
+
+        query_filter = Filter(
+            must=[
+                FieldCondition(
+                    key="workspace_id",
+                    match=MatchValue(
+                        value=workspace_id
+                    ),
+                )
+            ]
+        )
+
+        results = self.client.query_points(
+            collection_name=self.collection_name,
+            query=vector,
+            query_filter=query_filter,
+            limit=top_k,
+            score_threshold=score_threshold,
+            with_payload=True,
+        )
+
+        return results.points
