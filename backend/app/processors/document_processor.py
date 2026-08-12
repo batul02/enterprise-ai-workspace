@@ -85,6 +85,7 @@ class DocumentProcessor:
                         "workspace_id": document.workspace_id,
                         "chunk_id": chunk.id,
                         "chunk_index": chunk.chunk_index,
+                        "content": chunk.content,
                         "filename": document.original_filename,
                     },
                 )
