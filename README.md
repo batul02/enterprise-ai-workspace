@@ -1,4 +1,3 @@
-````markdown
 # Enterprise AI Workspace
 
 A multi-tenant AI knowledge workspace built from scratch to understand and implement the core architecture behind enterprise RAG systems.
@@ -43,10 +42,10 @@ The goal is not to hide the complexity behind frameworks. Core components such a
 - [x] Semantic search
 - [x] Workspace-filtered vector retrieval
 - [x] Automated tests for major components
+- [x] Retrieval evaluation
 
 ### In Progress
 
-- [ ] Retrieval evaluation
 - [ ] Similarity threshold tuning
 - [ ] Page-aware chunk metadata
 - [ ] RAG answer generation
@@ -67,7 +66,6 @@ The goal is not to hide the complexity behind frameworks. Core components such a
 - [ ] Observability
 - [ ] Production deployment
 
----
 
 # Architecture
 
@@ -95,7 +93,6 @@ The current system follows a layered architecture:
                 │
                 ▼
              RAG Layer
-````
 
 The document ingestion pipeline is:
 
@@ -486,6 +483,29 @@ A query against Workspace A must never retrieve vectors belonging to Workspace B
 
 ---
 
+## RAG Pipeline
+
+The current document processing and retrieval pipeline is:
+
+Upload PDF
+   ↓
+PDF Text Extraction
+   ↓
+Custom Text Chunking
+   ↓
+Embedding Generation
+   ↓
+Qdrant Vector Store
+   ↓
+Semantic Search
+   ↓
+Top-K Relevant Chunks
+
+The project intentionally implements the core chunking, embedding, retrieval,
+and vector-store abstractions without relying on LangChain.
+
+---
+
 # Retrieval Thresholds
 
 Similarity thresholds are configurable rather than hardcoded to an arbitrary value.
@@ -867,7 +887,7 @@ Semantic Search
 
 Phase 7
 Retrieval Evaluation
-        →
+        ✓
 
 Phase 8
 RAG Generation
@@ -897,13 +917,28 @@ The current focus is **retrieval quality**.
 
 Before adding an LLM generation layer, the system will be evaluated on whether the correct chunks are retrieved for representative questions.
 
-See:
+## Retrieval Evaluation
 
-```text
-docs/retrieval_evaluation.md
-```
+An initial evaluation was performed using 10 questions against the NIST AI
+Risk Management Framework (AI RMF 1.0).
 
-for the evaluation process.
+| Metric | Result |
+|---|---:|
+| Questions | 10 |
+| Top-1 Relevant | 7/10 |
+| Top-3 Relevant | 10/10 |
+| Top-5 Relevant | 10/10 |
+| Top-1 Accuracy | 70% |
+| Top-3 Accuracy | 100% |
+| Top-5 Accuracy | 100% |
+| Average Best Similarity Score | 0.8200 |
+
+The initial results indicate that the retrieval system has strong recall within
+the Top-3 and Top-5 results, while Top-1 ranking remains an area for improvement.
+
+Detailed evaluation results are available in:
+
+`docs/retrieval_evaluation.md`
 
 ---
 
