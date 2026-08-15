@@ -11,7 +11,13 @@ from app.storage.file_storage import (
 )
 from app.core.constants import ExtractionStatus
 from app.services.chunking_service import chunk_text
-from app.processors import document_processor
+from app.processors.document_processor import DocumentProcessor
+from app.core.dependencies import (
+    embedding_service,
+    qdrant_store,
+)
+
+document_processor = DocumentProcessor(embedding_service=embedding_service, vector_store=qdrant_store,)
 
 def create_document(
     db: Session,
