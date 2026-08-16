@@ -3,6 +3,10 @@ from app.services.embedding_service import EmbeddingService
 from app.vectorstore.qdrant_store import QdrantStore
 from app.processors.document_processor import DocumentProcessor
 from app.services.retrieval_service import RetrievalService
+from ollama import Client
+from app.services.llm_service import LLMService
+from app.services.rag_service import RAGService
+from app.services.prompt_service import PromptService
 
 
 embedding_service = EmbeddingService(
@@ -25,4 +29,16 @@ retrieval_service = RetrievalService(
     embedding_service=embedding_service,
     vector_store=qdrant_store,
     score_threshold=settings.SEARCH_SCORE_THRESHOLD,
+)
+
+llm_service = LLMService(
+    client=Client(host=settings.OLLAMA_HOST),
+    model=settings.LLM_MODEL,
+)
+
+prompt_service = PromptService()
+rag_service = RAGService(
+    retrieval_service=retrieval_service,
+    prompt_service=prompt_service,
+    llm_service=llm_service,
 )

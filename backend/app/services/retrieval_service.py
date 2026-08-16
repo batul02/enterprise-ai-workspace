@@ -61,6 +61,7 @@ class RetrievalService:
                     content=payload["content"],
                     score=point.score,
                     document_id=payload["document_id"],
+                    chunk_index=payload["chunk_index"],
                     page_number=payload.get(
                         "page_number"
                     ),

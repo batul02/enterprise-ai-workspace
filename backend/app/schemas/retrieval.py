@@ -19,6 +19,7 @@ class SearchResult(BaseModel):
     content: str
     score: float
     document_id: int
+    chunk_index: int
     page_number: int | None = None
     filename: str
 
