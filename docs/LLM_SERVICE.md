@@ -258,3 +258,99 @@ I don't have enough information in the provided documents.
 And **not** an answer generated from the model's general knowledge.
 
 This second test is especially important because it tests whether our RAG system actually behaves as a **grounded QA system**, rather than simply being an LLM with retrieved text attached.
+
+
+{
+  "query": "What are the characteristics of trustworthy AI?",
+  "top_k": 5
+}
+
+
+{
+  "answer": "According to the provided document context, the characteristics of trustworthy AI systems include:\n\n1. Valid and Reliable\n2. Safe\n3. Secure and Resilient\n4. Accountable and Transparent\n5. Explainable and Interpretable\n6. Privacy-Enhanced\n7. Fair with managed harmful bias\n\nThese characteristics are shown in Figure 4, where \"Valid & Reliable\" is a necessary condition of trustworthiness and \"Accountable & Transparent\" relates to all other characteristics.",
+  "sources": [
+    {
+      "document_id": 34,
+      "chunk_id": 59,
+      "filename": "nist.ai.100-1.pdf",
+      "chunk_index": 42,
+      "score": 0.8762168
+    },
+    {
+      "document_id": 34,
+      "chunk_id": 58,
+      "filename": "nist.ai.100-1.pdf",
+      "chunk_index": 41,
+      "score": 0.8261244
+    },
+    {
+      "document_id": 34,
+      "chunk_id": 64,
+      "filename": "nist.ai.100-1.pdf",
+      "chunk_index": 47,
+      "score": 0.8199266
+    },
+    {
+      "document_id": 34,
+      "chunk_id": 22,
+      "filename": "nist.ai.100-1.pdf",
+      "chunk_index": 5,
+      "score": 0.79414666
+    },
+    {
+      "document_id": 34,
+      "chunk_id": 63,
+      "filename": "nist.ai.100-1.pdf",
+      "chunk_index": 46,
+      "score": 0.789013
+    }
+  ]
+}
+
+
+
+{
+    "query": "What is the CEO's favorite food?",
+    "top_k": 5
+}
+
+{
+  "answer": "I don't have enough information in the provided documents to answer the question. The documents contain information about the NIST AI RMF, its components, and best practices for managing AI risks, but they do not include information about the CEO's personal preferences or characteristics.",
+  "sources": [
+    {
+      "document_id": 34,
+      "chunk_id": 88,
+      "filename": "nist.ai.100-1.pdf",
+      "chunk_index": 71,
+      "score": 0.46429592
+    },
+    {
+      "document_id": 34,
+      "chunk_id": 92,
+      "filename": "nist.ai.100-1.pdf",
+      "chunk_index": 75,
+      "score": 0.45454428
+    },
+    {
+      "document_id": 34,
+      "chunk_id": 19,
+      "filename": "nist.ai.100-1.pdf",
+      "chunk_index": 2,
+      "score": 0.45257092
+    },
+    {
+      "document_id": 34,
+      "chunk_id": 102,
+      "filename": "nist.ai.100-1.pdf",
+      "chunk_index": 85,
+      "score": 0.43147635
+    },
+    {
+      "document_id": 34,
+      "chunk_id": 156,
+      "filename": "nist.ai.100-1.pdf",
+      "chunk_index": 139,
+      "score": 0.43013984
+    }
+  ]
+}

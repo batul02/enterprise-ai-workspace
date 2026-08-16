@@ -42,7 +42,7 @@ class PromptService:
         context_parts = []
 
         for index, chunk in enumerate(chunks, start=1):
-            content = chunk.get("content", "")
+            content = chunk.content
 
             if not content or not content.strip():
                 continue
@@ -50,8 +50,8 @@ class PromptService:
             context_parts.append(
                 f"""
                 --- Document Chunk {index} ---
-                Document: {chunk.get("filename", "Unknown")}
-                Chunk ID: {chunk.get("chunk_id", "Unknown")}
+                Document: {chunk.filename}
+                Chunk ID: {chunk.chunk_id}
                 Content:
                 {content}
                 """
