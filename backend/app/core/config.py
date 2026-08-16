@@ -20,6 +20,9 @@ class Settings:
     EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"
     
     SEARCH_SCORE_THRESHOLD: float = 0.0
+    
+    LLM_MODEL = os.getenv("LLM_MODEL")
+    OLLAMA_HOST = os.getenv("OLLAMA_HOST")
 
     DATABASE_URL = (
         f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}"
