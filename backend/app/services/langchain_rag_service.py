@@ -8,7 +8,6 @@ from qdrant_client.models import (
     Filter,
     MatchValue,
 )
-from langchain_core.documents import Document
 
 
 class LangChainRetrievalService:
@@ -72,3 +71,37 @@ class LangChainRetrievalService:
             print("Metadata:", result.metadata)
 
         return results
+
+class LangChainRAGService:
+
+    def __init__(
+        self,
+        retrieval_service,
+        prompt_service,
+        llm_service,
+    ):
+        self.retrieval_service = retrieval_service
+        self.prompt_service = prompt_service
+        self.llm_service = llm_service
+
+    def answer(
+        self,
+        question: str,
+        workspace_id: int,
+        top_k: int = 5,
+    ):
+
+        documents = self.retrieval_service.search(
+            query=question,
+            workspace_id=workspace_id,
+            top_k=top_k,
+        )
+
+        context = "\n\n".join(document.page_content for document in documents)
+
+        prompt = self.prompt_service.build_prompt(
+            question=question,
+            context=context,
+        )
+
+        return self.llm_service.generate(prompt)
