@@ -43,6 +43,7 @@ The goal is not to hide the complexity behind frameworks. Core components such a
 - [x] Workspace-filtered vector retrieval
 - [x] Automated tests for major components
 - [x] Retrieval evaluation
+- [x] LangChain orchestration
 
 ### In Progress
 
@@ -169,6 +170,44 @@ Documents and vectors are associated with a workspace.
 Retrieval is always filtered by `workspace_id` so that a search in Workspace A cannot return vectors belonging to Workspace B.
 
 ---
+
+|                      | Custom RAG              | LangChain Runnable   |
+| -------------------- | ----------------------- | -------------------- |
+| Retrieval            | Your `RetrievalService` | LangChain Retriever  |
+| Prompt               | Your `PromptService`    | `PromptTemplate`     |
+| LLM                  | Your `LLMService`       | `ChatOllama`         |
+| Orchestration        | Explicit Python         | Runnable composition |
+| Debugging            | Explicit                | Chain components     |
+| Framework dependency | Low                     | Higher               |
+
+
+---
+
+                    DONE
+                      │
+                      ▼
+              Embedding Adapter
+                      │
+                      ▼
+             QdrantVectorStore
+                      │
+                      ▼
+                 Retriever
+                      │
+                      ▼
+              PromptTemplate
+                      │
+                      ▼
+                ChatOllama
+                      │
+                      ▼
+             RAG Orchestration
+                      │
+                      ▼
+             ┌────────────────┐
+             │ NEXT: Runnable │
+             │    Chain       │
+             └────────────────┘
 
 # Authentication
 
