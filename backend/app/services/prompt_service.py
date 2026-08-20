@@ -48,8 +48,7 @@ class PromptService:
                 continue
 
             context_parts.append(
-                f"""
-                --- Document Chunk {index} ---
+                f"""SOURCE {index}
                 Document: {chunk.filename}
                 Chunk ID: {chunk.chunk_id}
                 Content:
