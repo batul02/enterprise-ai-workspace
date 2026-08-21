@@ -7,11 +7,9 @@ from ollama import Client
 from app.services.llm_service import LLMService
 from app.services.rag_service import RAGService
 from app.services.prompt_service import PromptService
+from app.services.query_transformer import QueryTransformer
 
-
-embedding_service = EmbeddingService(
-    model_name=settings.EMBEDDING_MODEL
-)
+embedding_service = EmbeddingService(model_name=settings.EMBEDDING_MODEL)
 
 qdrant_store = QdrantStore(
     host=settings.QDRANT_HOST,
@@ -36,9 +34,12 @@ llm_service = LLMService(
     model=settings.LLM_MODEL,
 )
 
+query_transformer = QueryTransformer(llm_service=llm_service)
+
 prompt_service = PromptService()
 rag_service = RAGService(
     retrieval_service=retrieval_service,
     prompt_service=prompt_service,
     llm_service=llm_service,
+    query_transformer=query_transformer,
 )
