@@ -44,6 +44,7 @@ The goal is not to hide the complexity behind frameworks. Core components such a
 - [x] Automated tests for major components
 - [x] Retrieval evaluation
 - [x] LangChain orchestration
+- [x] Query Transformation
 
 ### In Progress
 
@@ -980,6 +981,57 @@ Detailed evaluation results are available in:
 `docs/retrieval_evaluation.md`
 
 ---
+
+#  Query Transformation
+
+You learned the theory today.
+
+Tomorrow, implement the **first practical version**.
+
+Create:
+
+```
+services/
+```
+
+    query\_transformer.py
+
+Start with **query rewriting**.
+
+Example:
+
+```
+Conversation:
+```
+
+User:
+
+"What is the interest rate?"
+
+Assistant:
+
+...
+
+User:
+
+"What about the second one?"
+
+Transform:
+
+```
+"What about the second one?"
+```
+
+into something self-contained, such as:
+
+```
+"What is the interest rate for the second loan product?"
+```
+
+The transformed query then goes into retrieval.
+
+---
+
 
 # License
 
