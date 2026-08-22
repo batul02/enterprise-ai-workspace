@@ -89,6 +89,10 @@ def chat(
         query=request.query,
         workspace_id=workspace_id,
         top_k=request.top_k,
+        conversation_history=[
+        message.model_dump()
+            for message in request.conversation_history
+        ],
     )
 
     return result

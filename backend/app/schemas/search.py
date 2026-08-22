@@ -1,6 +1,9 @@
 from pydantic import BaseModel, Field
 
 
+class ChatMessage(BaseModel):
+    role: str
+    content: str
 class ChatRequest(BaseModel):
     """
     Request payload for document-grounded chat.
@@ -17,6 +20,10 @@ class ChatRequest(BaseModel):
         ge=1,
         le=20,
         description="Number of document chunks to retrieve.",
+    )
+    
+    conversation_history: list[ChatMessage] = Field(
+        default_factory=list
     )
 
 
@@ -36,6 +43,5 @@ class ChatResponse(BaseModel):
     """
     Grounded answer and supporting document sources.
     """
-
     answer: str
     sources: list[ChatSource]
