@@ -8,6 +8,7 @@ from app.services.llm_service import LLMService
 from app.services.rag_service import RAGService
 from app.services.prompt_service import PromptService
 from app.services.query_transformer import QueryTransformer
+from app.agents.graph import build_graph
 
 embedding_service = EmbeddingService(model_name=settings.EMBEDDING_MODEL)
 
@@ -42,4 +43,10 @@ rag_service = RAGService(
     prompt_service=prompt_service,
     llm_service=llm_service,
     query_transformer=query_transformer,
+)
+
+agents_service = build_graph(
+    retrieval_service=retrieval_service,
+    prompt_service=prompt_service,
+    llm_service=llm_service,
 )
