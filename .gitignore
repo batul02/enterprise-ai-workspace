@@ -11,6 +11,7 @@ backend/.mypy_cache/
 backend/.ruff_cache/
 
 # Environment Variables
+.env
 backend/.env
 backend/.env.*
 
