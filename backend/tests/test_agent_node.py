@@ -1,10 +1,7 @@
 from app.agents.nodes import agent_node
-from app.services.langchain_llm_service import LangChainLLMService
-from app.core.config import settings
 
 
 def test_agent_node_can_call_search_tool():
-    langchain_llm_service = LangChainLLMService(model=settings.LLM_MODEL)
     state = {
         "query": "What are the characteristics of trustworthy AI?",
         "workspace_id": 61,
@@ -12,7 +9,6 @@ def test_agent_node_can_call_search_tool():
 
     result = agent_node(
         state,
-        langchain_llm_service,
     )
 
     assert result
