@@ -17,7 +17,11 @@ from app.core.dependencies import (
     qdrant_store,
 )
 
-document_processor = DocumentProcessor(embedding_service=embedding_service, vector_store=qdrant_store,)
+document_processor = DocumentProcessor(
+    embedding_service=embedding_service,
+    vector_store=qdrant_store,
+)
+
 
 def create_document(
     db: Session,
@@ -74,6 +78,7 @@ def create_document(
 
     return document
 
+
 def list_documents(
     db: Session,
     workspace_id: int,
@@ -87,6 +92,7 @@ def list_documents(
 
     return list(db.scalars(statement).all())
 
+
 def get_document(
     db: Session,
     document_id: int,
@@ -97,13 +103,12 @@ def get_document(
         document_id,
     )
 
+
 def delete_document(
     db: Session,
     document: Document,
 ):
-
+    qdrant_store.delete_by_document(document.id)
     delete_file(document.storage_path)
-
     db.delete(document)
-
     db.commit()
