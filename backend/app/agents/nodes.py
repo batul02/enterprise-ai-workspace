@@ -1,5 +1,43 @@
 from app.agents.state import AgentState
+from app.agents.tools import search_documents
 
+
+def agent_node(state, langchain_llm_service):
+    query = state["query"]
+
+    llm = langchain_llm_service.llm.bind_tools([search_documents])
+
+    response = llm.invoke(
+        [
+            (
+                "system",
+                """
+                You are an assistant for a document workspace.
+
+                You have access to the search_documents tool.
+
+                When the user's question requires information
+                from workspace documents, use the tool.
+
+                The workspace ID is provided by the application.
+                Always use the provided workspace ID when calling
+                search_documents.
+                """,
+            ),
+            (
+                "user",
+                f"""
+                Workspace ID: {state["workspace_id"]}
+                User question:
+                {query}
+                """,
+            ),
+        ]
+    )
+
+    return {
+        "messages": [response],
+    }
 
 def rag_search_node(
     state: AgentState,
