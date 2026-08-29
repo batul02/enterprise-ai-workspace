@@ -370,4 +370,98 @@ Tools
 Agent
 ```
 
-And importantly, we'll keep your existing **Custom RAG + LangChain RAG** untouched. The LangGraph workflow becomes a third orchestration layer rather than replacing what you've already built.
+The **first LangGraph workflow is working end-to-end with your real services**.
+
+We now have:
+
+```text
+User Query
+    ↓
+LangGraph State
+    ↓
+Router
+    ├───────────────┐
+    ↓               ↓
+   RAG           Direct
+    ↓               ↓
+Retrieval          LLM
+    ↓
+Generate
+    ↓
+LLM
+    ↓
+Answer
+```
+
+And you've verified both paths with real services.
+
+### What we've learned/implemented
+
+* **State** — query, workspace, route, retrieved chunks, answer
+* **Nodes** — router, retrieval, direct answer, generate
+* **Edges** — normal transitions between nodes
+* **Conditional edge** — router chooses `rag` vs `direct`
+* **Real service injection** — Qdrant/retrieval, prompt service, and Ollama/LLM
+* **Integration tests** — both paths actually execute successfully
+
+### Next: inspect the graph execution
+
+Before adding more agent complexity, I want you to actually **see which nodes execute**.
+
+For example, for:
+
+```text
+"What are the characteristics of trustworthy AI?"
+```
+
+we should be able to observe:
+
+```text
+START
+ ↓
+router
+ ↓
+rag_search
+ ↓
+generate
+ ↓
+END
+```
+
+while:
+
+```text
+"Hello"
+```
+
+should show:
+
+```text
+START
+ ↓
+router
+ ↓
+direct_answer
+ ↓
+END
+```
+
+This is the next thing I'd do because it makes **conditional routing in LangGraph tangible**, rather than just something hidden inside `graph.invoke()`.
+
+After that, we'll move to **tool invocation**, which is the important step toward a genuine agent:
+
+```text
+Agent
+  ↓
+decides whether to use tool
+  ↓
+search_documents()
+  ↓
+Qdrant
+  ↓
+observation
+  ↓
+LLM
+```
+
+That's where we'll start moving from **agentic workflow → actual tool-using agent**.

@@ -92,3 +92,33 @@ def test_chunk_splits_on_sentence_boundary():
     # Ensure we don't split in the middle of a word
     for chunk in chunks[:-1]:
         assert not chunk.content.endswith(" ")
+
+#New test after correcting Fix chunker bug        
+def test_chunk_text_never_creates_negative_start():
+    text = (
+        "This is a short sentence. "
+        "This is another sentence. "
+        "This is a third sentence."
+    )
+
+    chunks = chunk_text(text)
+
+    assert chunks
+
+    for chunk in chunks:
+        assert chunk.start_char >= 0
+        assert chunk.end_char > chunk.start_char
+        assert chunk.content
+        
+def test_chunk_text_clamps_overlap_at_zero():
+    text = "First sentence.\nSecond sentence."
+
+    chunks = chunk_text(text)
+
+    assert chunks
+
+    for chunk in chunks:
+        assert chunk.start_char >= 0
+        assert chunk.end_char <= len(text)
+        assert chunk.end_char > chunk.start_char
+        assert chunk.content.strip()

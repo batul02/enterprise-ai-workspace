@@ -104,7 +104,9 @@ def chunk_text(
         if end == len(text):
             break
 
-        start = end - CHUNK_OVERLAP
+        # start = end - CHUNK_OVERLAP
+        # Fix chunker bug solve
+        start = max(0, end - CHUNK_OVERLAP)
 
         chunk_index += 1
 
