@@ -11,21 +11,12 @@ from app.storage.file_storage import (
 )
 from app.core.constants import ExtractionStatus
 from app.services.chunking_service import chunk_text
-from app.processors.document_processor import DocumentProcessor
-from app.core.dependencies import (
-    embedding_service,
-    qdrant_store,
-)
-
-document_processor = DocumentProcessor(
-    embedding_service=embedding_service,
-    vector_store=qdrant_store,
-)
 
 
 def create_document(
     db: Session,
     workspace_id: int,
+    document_processor,
     uploaded_by: int,
     file: UploadFile,
 ) -> Document:
@@ -107,6 +98,7 @@ def get_document(
 def delete_document(
     db: Session,
     document: Document,
+    qdrant_store,
 ):
     qdrant_store.delete_by_document(document.id)
     delete_file(document.storage_path)

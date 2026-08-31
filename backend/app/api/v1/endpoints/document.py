@@ -5,8 +5,10 @@ from fastapi import (
     HTTPException,
     UploadFile,
     status,
+    Request,
 )
 from sqlalchemy.orm import Session
+from app.core.dependencies import AppResources
 
 from app.api.v1.endpoints.auth import get_current_user
 from app.db.database import get_db
@@ -46,6 +48,7 @@ def verify_workspace_access(
 )
 def upload_document(
     workspace_id: int,
+    http_request: Request,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -67,10 +70,12 @@ def upload_document(
     )
 
     validate_pdf(file)
+    resources: AppResources = http_request.app.state.resources
 
     return create_document(
         db=db,
         workspace_id=workspace.id,
+        document_processor=resources.document_processor,
         uploaded_by=current_user.id,
         file=file,
     )
@@ -145,6 +150,7 @@ def get_document_by_id(
 )
 def remove_document(
     document_id: int,
+    http_request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -169,8 +175,11 @@ def remove_document(
         workspace,
         current_user,
     )
+    
+    resources: AppResources = http_request.app.state.resources
 
     delete_document(
         db,
         document,
+        resources.qdrant_store
     )

@@ -2,11 +2,15 @@ from langgraph.graph import StateGraph, START, END
 
 from app.agents.state import AgentState
 from app.agents.router import route_query
-from app.agents.nodes import agent_node, rag_search_node, direct_answer_node, generate_node
+from app.agents.nodes import (
+    agent_node,
+    rag_search_node,
+    direct_answer_node,
+    generate_node,
+)
 from langgraph.prebuilt import ToolNode
-from app.agents.tools import search_documents
+from app.agents.tools import create_search_documents_tool
 
-tool_node = ToolNode([search_documents])
 
 def should_continue(state):
     messages = state.get("messages", [])
@@ -21,11 +25,15 @@ def should_continue(state):
 
     return "direct"
 
+
 def build_graph(
     retrieval_service,
     prompt_service,
     llm_service,
+    langchain_llm_service,
 ):
+    search_documents = create_search_documents_tool(retrieval_service)
+    tool_node = ToolNode([search_documents])
 
     graph = StateGraph(AgentState)
 
@@ -77,23 +85,24 @@ def build_graph(
     #     "rag_search",
     #     "generate",
     # )
-    
+
     graph.add_node(
         "agent",
         lambda state: agent_node(
             state,
+            langchain_llm_service,
+            search_documents,
         ),
     )
 
-    
     graph.add_edge(
         START,
         "agent",
     )
-    
+
     # graph.add_node("agent", agent_node)
     graph.add_node("tools", tool_node)
-    
+
     graph.add_conditional_edges(
         "agent",
         should_continue,
@@ -102,7 +111,7 @@ def build_graph(
             "direct": "direct_answer",
         },
     )
-    
+
     # graph.add_edge("tools", "agent")
     graph.add_edge("tools", "generate")
 

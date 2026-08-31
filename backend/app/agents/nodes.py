@@ -1,12 +1,10 @@
 from app.agents.state import AgentState
-from app.agents.tools import search_documents
-from app.services.langchain_llm_service import LangChainLLMService
-from app.core.config import settings
 
 
-def agent_node(state):
+def agent_node(state: AgentState,
+    langchain_llm_service,
+    search_documents,):
     query = state["query"]
-    langchain_llm_service = LangChainLLMService(model=settings.LLM_MODEL)
     llm = langchain_llm_service.llm.bind_tools([search_documents])
 
     response = llm.invoke(

@@ -199,3 +199,87 @@ I'd follow this sequence:
         └──────────────────────┘
 ```
 
+
+PROJECT
+□ Remove import-time heavy initialization
+□ FastAPI lifespan
+□ Shared dependency initialization
+□ /health
+□ Liveness vs readiness
+
+
+⚙️ Dependency & Application Lifecycle
+
+This was the other major thing we started today.
+
+Before
+
+Our dependencies.py was doing heavy work during import:
+
+import dependencies.py
+       ↓
+load embedding model
+       ↓
+initialize Qdrant
+       ↓
+initialize LLM
+       ↓
+create RAG service
+       ↓
+build agent graph
+
+That's bad because merely importing the application caused expensive external initialization.
+
+After
+
+We moved toward:
+
+FastAPI starts
+      ↓
+lifespan()
+      ↓
+create_resources()
+      ↓
+Embedding
+Qdrant
+LLM
+Retrieval
+RAG
+Agent
+      ↓
+app.state.resources
+      ↓
+Application running
+
+We introduced an AppResources container and create_resources().
+
+5. Added FastAPI lifespan
+
+We moved resource initialization into FastAPI's:
+
+@asynccontextmanager
+async def lifespan(app):
+
+So startup and shutdown have a proper lifecycle.
+
+6. Added /health
+
+We added:
+
+GET /health
+
+returning:
+
+{
+  "status": "healthy"
+}
+
+We also distinguished:
+
+Liveness
+→ Is the process alive?
+
+Readiness
+→ Is the application ready to serve requests?
+
+We haven't built an elaborate readiness system yet.

@@ -9,44 +9,124 @@ from app.services.rag_service import RAGService
 from app.services.prompt_service import PromptService
 from app.services.query_transformer import QueryTransformer
 from app.agents.graph import build_graph
+from app.services.langchain_llm_service import LangChainLLMService
 
-embedding_service = EmbeddingService(model_name=settings.EMBEDDING_MODEL)
+from dataclasses import dataclass
 
-qdrant_store = QdrantStore(
-    host=settings.QDRANT_HOST,
-    port=settings.QDRANT_PORT,
-    collection_name=settings.QDRANT_COLLECTION,
-    vector_size=embedding_service.get_embedding_dimension(),
-)
+@dataclass
+class AppResources:
+    embedding_service: object
+    qdrant_store: object
+    document_processor: object
+    retrieval_service: object
+    llm_service: object
+    query_transformer: object
+    prompt_service: object
+    rag_service: object
+    agents_service: object
+    langchain_llm_service: object
+    
+def create_resources() -> AppResources:
 
-document_processor = DocumentProcessor(
-    embedding_service=embedding_service,
-    vector_store=qdrant_store,
-)
+    embedding_service = EmbeddingService(
+        model_name=settings.EMBEDDING_MODEL
+    )
 
-retrieval_service = RetrievalService(
-    embedding_service=embedding_service,
-    vector_store=qdrant_store,
-    score_threshold=settings.SEARCH_SCORE_THRESHOLD,
-)
+    qdrant_store = QdrantStore(
+        host=settings.QDRANT_HOST,
+        port=settings.QDRANT_PORT,
+        collection_name=settings.QDRANT_COLLECTION,
+        vector_size=embedding_service.get_embedding_dimension(),
+    )
 
-llm_service = LLMService(
-    client=Client(host=settings.OLLAMA_HOST),
-    model=settings.LLM_MODEL,
-)
+    document_processor = DocumentProcessor(
+        embedding_service=embedding_service,
+        vector_store=qdrant_store,
+    )
 
-query_transformer = QueryTransformer(llm_service=llm_service)
+    retrieval_service = RetrievalService(
+        embedding_service=embedding_service,
+        vector_store=qdrant_store,
+        score_threshold=settings.SEARCH_SCORE_THRESHOLD,
+    )
 
-prompt_service = PromptService()
-rag_service = RAGService(
-    retrieval_service=retrieval_service,
-    prompt_service=prompt_service,
-    llm_service=llm_service,
-    query_transformer=query_transformer,
-)
+    llm_service = LLMService(
+        client=Client(host=settings.OLLAMA_HOST),
+        model=settings.LLM_MODEL,
+    )
 
-agents_service = build_graph(
-    retrieval_service=retrieval_service,
-    prompt_service=prompt_service,
-    llm_service=llm_service,
-)
+    query_transformer = QueryTransformer(
+        llm_service=llm_service
+    )
+
+    prompt_service = PromptService()
+
+    rag_service = RAGService(
+        retrieval_service=retrieval_service,
+        prompt_service=prompt_service,
+        llm_service=llm_service,
+        query_transformer=query_transformer,
+    )
+    
+    langchain_llm_service = LangChainLLMService(model=settings.LLM_MODEL)
+
+    agents_service = build_graph(
+        retrieval_service=retrieval_service,
+        prompt_service=prompt_service,
+        llm_service=llm_service,
+        langchain_llm_service=langchain_llm_service,
+    )
+    
+    return AppResources(
+        embedding_service=embedding_service,
+        qdrant_store=qdrant_store,
+        document_processor=document_processor,
+        retrieval_service=retrieval_service,
+        llm_service=llm_service,
+        query_transformer=query_transformer,
+        prompt_service=prompt_service,
+        rag_service=rag_service,
+        agents_service=agents_service,
+        langchain_llm_service=langchain_llm_service,
+    )
+    
+# embedding_service = EmbeddingService(model_name=settings.EMBEDDING_MODEL)
+
+# qdrant_store = QdrantStore(
+#     host=settings.QDRANT_HOST,
+#     port=settings.QDRANT_PORT,
+#     collection_name=settings.QDRANT_COLLECTION,
+#     vector_size=embedding_service.get_embedding_dimension(),
+# )
+
+# document_processor = DocumentProcessor(
+#     embedding_service=embedding_service,
+#     vector_store=qdrant_store,
+# )
+
+# retrieval_service = RetrievalService(
+#     embedding_service=embedding_service,
+#     vector_store=qdrant_store,
+#     score_threshold=settings.SEARCH_SCORE_THRESHOLD,
+# )
+
+# llm_service = LLMService(
+#     client=Client(host=settings.OLLAMA_HOST),
+#     model=settings.LLM_MODEL,
+# )
+
+# query_transformer = QueryTransformer(llm_service=llm_service)
+
+# prompt_service = PromptService()
+# rag_service = RAGService(
+#     retrieval_service=retrieval_service,
+#     prompt_service=prompt_service,
+#     llm_service=llm_service,
+#     query_transformer=query_transformer,
+# )
+
+# agents_service = build_graph(
+#     retrieval_service=retrieval_service,
+#     prompt_service=prompt_service,
+#     llm_service=llm_service,
+# )
