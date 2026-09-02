@@ -1,7 +1,18 @@
 from app.agents.nodes import agent_node
+from app.agents.tools import create_search_documents_tool
+from app.core.dependencies import create_resources
 
 
 def test_agent_node_can_call_search_tool():
+    
+    # Create application resources for this test
+    resources = create_resources()
+    
+    # Create the tool using the real retrieval service
+    search_documents = create_search_documents_tool(
+        resources.retrieval_service
+    )
+    
     state = {
         "query": "What are the characteristics of trustworthy AI?",
         "workspace_id": 61,
@@ -9,6 +20,8 @@ def test_agent_node_can_call_search_tool():
 
     result = agent_node(
         state,
+        resources.langchain_llm_service,
+        search_documents,
     )
 
     assert result
@@ -34,3 +47,5 @@ def test_agent_node_can_call_search_tool():
 
     print("\n--- TOOL ARGUMENTS ---")
     print(tool_call["args"])
+    
+    assert tool_call["args"]["workspace_id"] == 61

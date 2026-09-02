@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from sqlalchemy.orm import Session
 
-from app.core.dependencies import retrieval_service, rag_service
+from app.core.dependencies import AppResources
 from app.schemas.retrieval import (
     SearchRequest,
     SearchResponse,
@@ -25,11 +26,9 @@ router = APIRouter()
 def search_workspace(
     workspace_id: int,
     request: SearchRequest,
+    http_request: Request,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
-    service: RetrievalService = Depends(
-        lambda: retrieval_service
-    ),
 ):
     workspace = get_workspace_by_id(
         db,
@@ -47,7 +46,9 @@ def search_workspace(
         current_user,
     )
 
-    results = service.search(
+    resources: AppResources = http_request.app.state.resources
+
+    results = resources.retrieval_service.search(
         query=request.query,
         workspace_id=workspace_id,
         top_k=request.top_k,
@@ -57,7 +58,8 @@ def search_workspace(
         query=request.query,
         results=results,
     )
-    
+
+
 @router.post(
     "/workspaces/{workspace_id}/chat",
     response_model=ChatResponse,
@@ -65,6 +67,7 @@ def search_workspace(
 def chat(
     workspace_id: int,
     request: ChatRequest,
+    http_request: Request,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
@@ -85,13 +88,14 @@ def chat(
         current_user=current_user,
     )
 
-    result = rag_service.answer(
+    resources: AppResources = http_request.app.state.resources
+
+    result = resources.rag_service.answer(
         query=request.query,
         workspace_id=workspace_id,
         top_k=request.top_k,
         conversation_history=[
-        message.model_dump()
-            for message in request.conversation_history
+            message.model_dump() for message in request.conversation_history
         ],
     )
 
