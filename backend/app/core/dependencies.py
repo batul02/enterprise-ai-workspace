@@ -10,6 +10,7 @@ from app.services.prompt_service import PromptService
 from app.services.query_transformer import QueryTransformer
 from app.agents.graph import build_graph
 from app.services.langchain_llm_service import LangChainLLMService
+from app.services.agent_service import AgentService
 
 from dataclasses import dataclass
 
@@ -25,6 +26,7 @@ class AppResources:
     rag_service: object
     agents_service: object
     langchain_llm_service: object
+    agent_service: AgentService
     
 def create_resources() -> AppResources:
 
@@ -77,6 +79,10 @@ def create_resources() -> AppResources:
         langchain_llm_service=langchain_llm_service,
     )
     
+    agent_service = AgentService(
+        graph=agents_service
+    )
+    
     return AppResources(
         embedding_service=embedding_service,
         qdrant_store=qdrant_store,
@@ -88,6 +94,7 @@ def create_resources() -> AppResources:
         rag_service=rag_service,
         agents_service=agents_service,
         langchain_llm_service=langchain_llm_service,
+        agent_service=agent_service,
     )
     
 # embedding_service = EmbeddingService(model_name=settings.EMBEDDING_MODEL)

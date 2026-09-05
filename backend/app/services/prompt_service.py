@@ -27,6 +27,7 @@ class PromptService:
         self,
         query: str,
         chunks: Sequence[dict],
+        conversation_history: Sequence[dict] | None = None,
     ) -> str:
         """
         Build a grounded prompt from the user query
@@ -62,9 +63,25 @@ class PromptService:
             )
 
         context = "\n".join(context_parts)
+        
+        history_parts = []
+
+        for message in conversation_history or []:
+            role = message.get("role")
+            content = message.get("content")
+
+            if role and content:
+                history_parts.append(
+                    f"{role.upper()}: {content}"
+                )
+
+        conversation = "\n".join(history_parts)
 
         prompt = f"""
             {self.SYSTEM_INSTRUCTIONS}
+            
+            CONVERSATION HISTORY:
+            {conversation}
 
             DOCUMENT CONTEXT:
             {context}

@@ -90,12 +90,20 @@ def chat(
 
     resources: AppResources = http_request.app.state.resources
 
-    result = resources.rag_service.answer(
+    # result = resources.rag_service.answer(
+    #     query=request.query,
+    #     workspace_id=workspace_id,
+    #     top_k=request.top_k,
+    #     conversation_history=[
+    #         message.model_dump() for message in request.conversation_history
+    #     ],
+    # )
+    result = resources.agent_service.chat(
         query=request.query,
         workspace_id=workspace_id,
-        top_k=request.top_k,
         conversation_history=[
-            message.model_dump() for message in request.conversation_history
+            message.model_dump()
+            for message in request.conversation_history
         ],
     )
 
