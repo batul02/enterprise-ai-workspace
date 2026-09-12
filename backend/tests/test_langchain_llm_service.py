@@ -1,3 +1,6 @@
+import pytest
+
+pytestmark = pytest.mark.integration
 from app.services.langchain_llm_service import LangChainLLMService
 from app.core.config import settings
 

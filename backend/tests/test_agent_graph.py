@@ -1,10 +1,9 @@
+import pytest
+
+pytestmark = pytest.mark.integration
+
 from app.agents.graph import build_graph
-from app.core.dependencies import (
-    retrieval_service,
-    prompt_service,
-    llm_service,
-    agents_service,
-)
+
 
 
 class FakeRetrievalService:
@@ -70,6 +69,9 @@ def create_graph(retrieval_service, prompt_service, llm_service):
 
 
 def test_agent_routes_rag_query():
+    from app.core.dependencies import create_resources
+    resources = create_resources()
+    agents_service = resources.agents_service
 
     graph = agents_service
 
@@ -86,6 +88,9 @@ def test_agent_routes_rag_query():
 
 
 def test_agent_routes_direct_query():
+    from app.core.dependencies import create_resources
+    resources = create_resources()
+    agents_service = resources.agents_service
     graph = agents_service
 
     result = graph.invoke(
@@ -100,6 +105,11 @@ def test_agent_routes_direct_query():
 
 
 def test_direct_query_does_not_call_retrieval():
+    from app.core.dependencies import create_resources
+    resources = create_resources()
+    retrieval_service = resources.retrieval_service
+    prompt_service = resources.prompt_service
+    llm_service = resources.llm_service
     retrieval = retrieval_service
     prompt = prompt_service
     llm = llm_service
@@ -126,6 +136,12 @@ def test_direct_query_does_not_call_retrieval():
 
 
 def test_rag_query_calls_retrieval():
+    from app.core.dependencies import create_resources
+    resources = create_resources()
+    retrieval_service = resources.retrieval_service
+    prompt_service = resources.prompt_service
+    llm_service = resources.llm_service
+
     retrieval = retrieval_service
     prompt = prompt_service
     llm = llm_service
@@ -152,6 +168,12 @@ def test_rag_query_calls_retrieval():
 
 
 def test_rag_path_calls_prompt_and_llm():
+    from app.core.dependencies import create_resources
+    resources = create_resources()
+    retrieval_service = resources.retrieval_service
+    prompt_service = resources.prompt_service
+    llm_service = resources.llm_service
+
     retrieval = retrieval_service
     prompt = prompt_service
     llm = llm_service
@@ -182,6 +204,12 @@ def test_rag_path_calls_prompt_and_llm():
 
 
 def test_direct_path_calls_llm():
+    from app.core.dependencies import create_resources
+    resources = create_resources()
+    retrieval_service = resources.retrieval_service
+    prompt_service = resources.prompt_service
+    llm_service = resources.llm_service
+
     retrieval = retrieval_service
     prompt = prompt_service
     llm = llm_service

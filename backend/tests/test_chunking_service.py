@@ -1,3 +1,6 @@
+import pytest
+
+pytestmark = pytest.mark.integration
 from app.core.constants import (
     CHUNK_OVERLAP,
     CHUNK_SIZE,

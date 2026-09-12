@@ -1,16 +1,20 @@
+import pytest
+
+pytestmark = pytest.mark.integration
 from app.services.langchain_rag_service import LangChainRetrievalService
 from app.services.embedding_service import EmbeddingService
 from app.core.config import settings
 from qdrant_client import QdrantClient
-from app.core.dependencies import qdrant_store, embedding_service
 
 
 def test_langchain_retrieval():
+    from app.core.dependencies import create_resources
+    resources = create_resources()
 
     service = LangChainRetrievalService(
-        qdrant_client=qdrant_store.client,
+        qdrant_client=resources.qdrant_store.client,
         collection_name=settings.QDRANT_COLLECTION,
-        embedding_service=embedding_service,
+        embedding_service=resources.embedding_service,
     )
 
     results = service.search(
@@ -19,7 +23,7 @@ def test_langchain_retrieval():
         top_k=5,
     )
     
-    points = qdrant_store.client.retrieve(
+    points = resources.qdrant_store.client.retrieve(
         collection_name=settings.QDRANT_COLLECTION,
         ids=[59],
         with_payload=True,

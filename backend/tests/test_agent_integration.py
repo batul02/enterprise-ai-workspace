@@ -1,9 +1,13 @@
-from app.core.dependencies import agents_service
+import pytest
+
+pytestmark = pytest.mark.integration
 
 
 def test_full_agent_rag_flow():
+    from app.core.dependencies import create_resources
+    resources = create_resources()
 
-    result = agents_service.invoke(
+    result = resources.agents_service.invoke(
         {
             "query": "What are the characteristics of trustworthy AI?",
             "workspace_id": 61,

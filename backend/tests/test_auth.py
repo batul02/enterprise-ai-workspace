@@ -1,3 +1,6 @@
+import pytest
+
+pytestmark = pytest.mark.integration
 from tests.conftest import register_user, login_user
 
 # def register_user(client):
