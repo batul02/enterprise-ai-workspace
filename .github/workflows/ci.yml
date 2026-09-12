@@ -21,6 +21,9 @@ jobs:
       DB_HOST: localhost
       DB_PORT: "5432"
       DB_NAME: enterprise_ai
+      JWT_SECRET_KEY: ce67e519e0f9ae389c48da9d8ba5137b61aa79262bb4fe3ef7e553da7141db2a
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "30"
 
     services:
       postgres:
