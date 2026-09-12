@@ -1,9 +1,10 @@
-from app.core.dependencies import agents_service
+from app.core.dependencies import create_resources
+resources = create_resources()
 
 
 def test_full_agent_rag_flow():
 
-    result = agents_service.invoke(
+    result = resources.agents_service.invoke(
         {
             "query": "What are the characteristics of trustworthy AI?",
             "workspace_id": 61,

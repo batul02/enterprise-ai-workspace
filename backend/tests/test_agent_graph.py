@@ -1,10 +1,11 @@
 from app.agents.graph import build_graph
-from app.core.dependencies import (
-    retrieval_service,
-    prompt_service,
-    llm_service,
-    agents_service,
-)
+from app.core.dependencies import create_resources
+resources = create_resources()
+retrieval_service = resources.retrieval_service
+prompt_service = resources.prompt_service
+llm_service = resources.llm_service
+agents_service = resources.agents_service
+
 
 
 class FakeRetrievalService:

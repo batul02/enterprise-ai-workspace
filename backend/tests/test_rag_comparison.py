@@ -13,7 +13,8 @@ from app.services.langchain_llm_service import (
 # Use the same objects/configuration that your existing tests use.
 from app.services.embedding_service import EmbeddingService
 from app.core.config import settings
-from app.core.dependencies import qdrant_store, rag_service, embedding_service
+from app.core.dependencies import create_resources
+resources = create_resources()
 
 WORKSPACE_ID = 61
 TOP_K = 5
@@ -30,9 +31,9 @@ QUESTIONS = [
 def create_langchain_rag():
 
     retrieval_service = LangChainRetrievalService(
-        qdrant_client=qdrant_store.client,
+        qdrant_client=resources.qdrant_store.client,
         collection_name=settings.QDRANT_COLLECTION,
-        embedding_service=embedding_service,
+        embedding_service=resources.embedding_service,
     )
 
     prompt_service = LangChainPromptService()
@@ -50,7 +51,7 @@ def create_langchain_rag():
 
 def test_rag_comparison():
 
-    custom_rag = rag_service
+    custom_rag = resources.rag_service
     langchain_rag = create_langchain_rag()
 
     for question in QUESTIONS:

@@ -1,6 +1,8 @@
 from qdrant_client.models import PointStruct
 
-from app.core.dependencies import qdrant_store
+from app.core.dependencies import create_resources
+resources = create_resources()
+qdrant_store = resources.qdrant_store
 
 
 def make_point(point_id: int):
