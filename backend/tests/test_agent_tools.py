@@ -2,8 +2,6 @@ import pytest
 
 pytestmark = pytest.mark.integration
 from app.agents.tools import create_search_documents_tool
-from app.core.dependencies import create_resources
-resources = create_resources()
 
 
 # def test_search_documents_tool():
@@ -24,6 +22,8 @@ resources = create_resources()
 #         print("Metadata:", chunk)
 
 def test_search_documents_tool():
+    from app.core.dependencies import create_resources
+    resources = create_resources()
     search_documents = create_search_documents_tool(
         resources.retrieval_service
     )

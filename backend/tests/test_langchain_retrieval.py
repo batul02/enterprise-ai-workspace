@@ -5,11 +5,11 @@ from app.services.langchain_rag_service import LangChainRetrievalService
 from app.services.embedding_service import EmbeddingService
 from app.core.config import settings
 from qdrant_client import QdrantClient
-from app.core.dependencies import create_resources
-resources = create_resources()
 
 
 def test_langchain_retrieval():
+    from app.core.dependencies import create_resources
+    resources = create_resources()
 
     service = LangChainRetrievalService(
         qdrant_client=resources.qdrant_store.client,

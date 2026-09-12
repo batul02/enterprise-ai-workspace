@@ -2,8 +2,6 @@ import pytest
 
 pytestmark = pytest.mark.integration
 from app.services.query_transformer import QueryTransformer
-from app.core.dependencies import create_resources
-resources = create_resources()
 
 
 class FakeLLMService:
@@ -108,6 +106,8 @@ def test_empty_history_is_handled():
     
     
 def test_query_transformer_with_real_llm():
+    from app.core.dependencies import create_resources
+    resources = create_resources()
 
     transformer = QueryTransformer(
         llm_service=resources.llm_service

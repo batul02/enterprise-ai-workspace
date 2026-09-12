@@ -2,11 +2,10 @@ import pytest
 
 pytestmark = pytest.mark.integration
 
-from app.core.dependencies import create_resources
-resources = create_resources()
-
 
 def test_full_agent_rag_flow():
+    from app.core.dependencies import create_resources
+    resources = create_resources()
 
     result = resources.agents_service.invoke(
         {
