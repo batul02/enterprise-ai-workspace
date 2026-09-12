@@ -1,3 +1,6 @@
+import pytest
+
+pytestmark = pytest.mark.integration
 from app.services.rag_service import RAGService
 from app.services.langchain_rag_service import (
     LangChainRAGService,

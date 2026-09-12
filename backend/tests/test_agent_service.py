@@ -1,3 +1,6 @@
+import pytest
+
+pytestmark = pytest.mark.integration
 from app.core.dependencies import create_resources
 
 

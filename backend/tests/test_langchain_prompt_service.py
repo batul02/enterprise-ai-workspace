@@ -1,3 +1,6 @@
+import pytest
+
+pytestmark = pytest.mark.integration
 from app.services.langchain_prompt_service import (
     LangChainPromptService,
 )

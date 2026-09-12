@@ -1,3 +1,6 @@
+import pytest
+
+pytestmark = pytest.mark.integration
 from app.services.query_transformer import QueryTransformer
 from app.core.dependencies import create_resources
 resources = create_resources()

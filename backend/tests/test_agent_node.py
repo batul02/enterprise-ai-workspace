@@ -1,3 +1,7 @@
+import pytest
+
+pytestmark = pytest.mark.integration
+
 from app.agents.nodes import agent_node
 from app.agents.tools import create_search_documents_tool
 from app.core.dependencies import create_resources

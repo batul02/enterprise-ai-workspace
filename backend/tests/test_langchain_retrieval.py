@@ -1,3 +1,6 @@
+import pytest
+
+pytestmark = pytest.mark.integration
 from app.services.langchain_rag_service import LangChainRetrievalService
 from app.services.embedding_service import EmbeddingService
 from app.core.config import settings

@@ -1,3 +1,6 @@
+import pytest
+
+pytestmark = pytest.mark.integration
 from qdrant_client.models import PointStruct
 
 from app.core.dependencies import create_resources

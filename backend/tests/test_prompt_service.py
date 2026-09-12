@@ -1,5 +1,8 @@
 import pytest
 
+pytestmark = pytest.mark.integration
+import pytest
+
 from app.services.prompt_service import PromptService
 from app.schemas.retrieval import SearchResult
 

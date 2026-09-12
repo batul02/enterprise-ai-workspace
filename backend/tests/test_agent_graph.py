@@ -1,3 +1,7 @@
+import pytest
+
+pytestmark = pytest.mark.integration
+
 from app.agents.graph import build_graph
 from app.core.dependencies import create_resources
 resources = create_resources()
