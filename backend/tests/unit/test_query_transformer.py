@@ -104,34 +104,34 @@ def test_empty_history_is_handled():
 
     assert "No previous conversation." in (llm_service.last_prompt)
     
-    
-def test_query_transformer_with_real_llm():
-    from app.core.dependencies import create_resources
-    resources = create_resources()
+# Integration test  
+# def test_query_transformer_with_real_llm():
+#     from app.core.dependencies import create_resources
+#     resources = create_resources()
 
-    transformer = QueryTransformer(
-        llm_service=resources.llm_service
-    )
+#     transformer = QueryTransformer(
+#         llm_service=resources.llm_service
+#     )
 
-    result = transformer.rewrite(
-        query="What about the second one?",
-        conversation_history=[
-            {
-                "role": "user",
-                "content": "What are the loan products?",
-            },
-            {
-                "role": "assistant",
-                "content": (
-                    "There are three products: "
-                    "Personal Loan, Home Loan and Auto Loan."
-                ),
-            },
-        ],
-    )
+#     result = transformer.rewrite(
+#         query="What about the second one?",
+#         conversation_history=[
+#             {
+#                 "role": "user",
+#                 "content": "What are the loan products?",
+#             },
+#             {
+#                 "role": "assistant",
+#                 "content": (
+#                     "There are three products: "
+#                     "Personal Loan, Home Loan and Auto Loan."
+#                 ),
+#             },
+#         ],
+#     )
 
-    print("\nRewritten query:")
-    print(result)
+#     print("\nRewritten query:")
+#     print(result)
 
-    assert result
-    assert len(result) > 0
+#     assert result
+#     assert len(result) > 0
