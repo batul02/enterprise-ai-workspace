@@ -1,6 +1,6 @@
-import pytest
+# import pytest
 
-pytestmark = pytest.mark.integration
+# pytestmark = pytest.mark.integration
 from unittest.mock import Mock
 
 from app.services.langchain_rag_service import LangChainRAGService
